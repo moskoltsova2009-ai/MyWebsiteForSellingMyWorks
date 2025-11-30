@@ -1,0 +1,588 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Обучающие материалы по английскому</title>
+  <style>
+    /* --- Общие стили --- */
+    :root {
+      --mint: #a8e6cf;
+      --mint-dark: #79d3b3;
+      --mint-light: #e0f7ed;
+      --text: #333;
+      --white: #fff;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* === ФОНОВАЯ АНИМАЦИЯ === */
+    body {
+      overflow-x: hidden;
+      position: relative;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Анимированный градиентный фон */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee, #c2e9fb, #a1c4fd);
+      background-size: 1200% 1200%;
+      animation: gradientBG 15s ease infinite;
+      z-index: -2;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Подложка для читаемости контента */
+    .content-wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Стили для движущихся букв */
+    .letter {
+      position: fixed;
+      font-weight: bold;
+      user-select: none;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      z-index: -1;
+      opacity: 0.85;
+      /* pointer-events будет включён только для hover через JS */
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: var(--mint-dark);
+      margin-bottom: 10px;
+    }
+
+    /* --- Поиск и фильтры --- */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .search-box, .filter-box {
+      padding: 10px;
+      border: 2px solid var(--mint);
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .filter-box {
+      background: var(--white);
+    }
+
+    /* --- Сетка товаров --- */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 25px;
+    }
+
+    .product-card {
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .product-info {
+      padding: 15px;
+    }
+
+    .product-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .product-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .product-price {
+      font-weight: bold;
+      color: var(--mint-dark);
+      font-size: 18px;
+    }
+
+    .btn-buy {
+      background-color: var(--mint);
+      color: var(--text);
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    /* --- Модальное окно --- */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: var(--white);
+      width: 90%;
+      max-width: 600px;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .carousel {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      overflow: hidden;
+    }
+
+    .carousel-images {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.4s ease;
+    }
+
+    .carousel-img {
+      min-width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .carousel-nav {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
+    .carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--mint); /* светло-мятный */
+  opacity: 0.6;
+  cursor: pointer;
+    }
+
+    .carousel-dot.active {
+  background: var(--mint-dark); /* тёмно-мятный (активная точка) */
+  opacity: 1;
+    }
+
+    .modal-info {
+      padding: 20px;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .modal-desc {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .modal-price {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--mint-dark);
+      margin: 15px 0;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-tg {
+      flex: 1;
+      min-width: 150px;
+      padding: 12px;
+      background: #0088cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* --- Адаптивность --- */
+    @media (max-width: 600px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .modal-content {
+        width: 95%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Основной контент поверх фона -->
+  <div class="content-wrapper">
+    <header>
+      <h1>Обучающие материалы по английскому языку</h1>
+      <p>Для детей и начинающих — весело, понятно и эффективно!</p>
+    </header>
+
+    <!-- === ПОИСК И ФИЛЬТРЫ === -->
+    <div class="controls">
+      <input type="text" class="search-box" id="search-input" placeholder="Поиск по названию или описанию...">
+      <select class="filter-box" id="category-filter">
+        <option value="">Все категории</option>
+        <option value="games">Игры</option>
+        <option value="worksheets">Рабочие листы</option>
+        <option value="grammar">Грамматика</option>
+        <option value="flashcards">Карточки</option>
+      </select>
+    </div>
+
+    <!-- === СЕТКА ТОВАРОВ === -->
+    <div class="products-grid" id="products-container">
+      <div class="product-card" data-category="games" data-name="Boardgame Reading CVC Ii" data-desc="Игровое поле для настольной игры для отработки чтения буквы i в закрытом слоге">
+        <img src="images/board game short i.png" alt="Boardgame Reading CVC Ii" class="product-img">
+        <div class="product-info">
+          <div class="product-title">Boardgame Reading CVC Ii</div>
+          <div class="product-desc">Игровое поле для настольной игры для отработки чтения буквы i в закрытом слоге</div>
+          <div class="product-price">50 ₽</div>
+          <button class="btn-buy" data-id="1">Купить</button>
+        </div>
+      </div>
+
+      <div class="product-card" data-category="games" data-name="Tic Tac Toe Reading CVC" data-desc="Карточки для игры в крестики-нолики для закрепления чтения гласных букв в закрытом слоге">
+        <img src="images/tic tac toe cvc.png" alt="Present Simple" class="product-img">
+        <div class="product-info">
+          <div class="product-title">Tic Tac Toe Reading CVC</div>
+          <div class="product-desc">Карточки для игры в крестики-нолики для закрепления чтения гласных букв в закрытом слоге</div>
+          <div class="product-price">50 ₽</div>
+          <button class="btn-buy" data-id="2">Купить</button>
+        </div>
+      </div>
+	
+	<div class="product-card" data-category="grammar" data-name="Tense Review" data-desc="Интерактивная презентация для повторения времён">
+        <img src="images/tense review.png" alt="Present Simple" class="product-img">
+        <div class="product-info">
+          <div class="product-title">Tense Review</div>
+          <div class="product-desc">Интерактивная презентация для повторения времён</div>
+          <div class="product-price">50 ₽</div>
+          <button class="btn-buy" data-id="3">Купить</button>
+        </div>
+      </div>
+  </div> <!-- /.content-wrapper -->
+
+  <!-- === МОДАЛЬНОЕ ОКНО (вне подложки, чтобы не было полупрозрачным) === -->
+  <div class="modal" id="product-modal">
+    <div class="modal-content">
+      <span class="close-modal" id="close-modal">&times;</span>
+
+      <div class="carousel">
+        <div class="carousel-images" id="modal-carousel-images">
+          <img src="https://via.placeholder.com/600x250/a8e6cf/333?text=Скрин+1" class="carousel-img" alt="1">
+          <img src="https://via.placeholder.com/600x250/a8e6cf/333?text=Скрин+2" class="carousel-img" alt="2">
+          <img src="https://via.placeholder.com/600x250/a8e6cf/333?text=Скрин+3" class="carousel-img" alt="3">
+        </div>
+        <div class="carousel-nav" id="carousel-dots"></div>
+      </div>
+
+      <div class="modal-info">
+        <h2 class="modal-title" id="modal-title">Название товара</h2>
+        <p class="modal-desc" id="modal-desc">Полное описание товара...</p>
+        <div class="modal-price" id="modal-price">0 ₽</div>
+        <div class="modal-buttons">
+          <button class="btn-tg" id="btn-tg">Заказать через Telegram</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === ОСНОВНЫЕ СКРИПТЫ (товары, модалка, Telegram) === -->
+  <script>
+    const products = {
+      1: {
+        title: "Boardgame Reading CVC Ii",
+        desc: "Игровое поле для настольной игры для отработки чтения буквы i в закрытом слоге. В формате PDF. Вам надо только распечатать, заламинировать и подготовить фишки и игральный кубик.",
+        price: "50 ₽",
+        images: [
+          "images/board game short i.png",
+          "images/board game short i_2.png",
+        ]
+      },
+      2: {
+        title: "Tic Tac Toe Reading CVC",
+        desc: "Карточки для игры в крестики-нолики для закрепления чтения гласных букв в закрытом слоге. В формате PDF. Если карточки распечатать и заламинировать, то их можно будет использовать многократно – писать маркером или фломастером и стирать.",
+        price: "50 ₽",
+        images: [
+          "images/tic tac toe cvc.png",
+          "images/tic tac toe cvc 2.png",
+		  "images/tic tac toe cvc 3.png"
+        ]
+      },
+	  3: {
+        title: "Tense Review",
+        desc: "Интерактивная презентация для повторения времён. В формате pptx. В презентации представлены такие времена и конструкции как Present Simple, Present Continuous, Present Perfect, Past Simple, Past Continuous, Future Simple, be going to.",
+        price: "50 ₽",
+        images: [
+          "images/tense review.png",
+          "images/tense review 2.png",
+		  "images/tense review 3.png"
+        ]
+      }
+    };
+
+    const modal = document.getElementById('product-modal');
+    const closeModal = document.getElementById('close-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalPrice = document.getElementById('modal-price');
+    const carouselImages = document.getElementById('modal-carousel-images');
+    const carouselDots = document.getElementById('carousel-dots');
+    const btnTg = document.getElementById('btn-tg');
+
+    let currentProductId = null;
+    let currentSlide = 0;
+
+    document.querySelectorAll('.btn-buy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        openModal(id);
+      });
+    });
+
+    function openModal(id) {
+      const prod = products[id];
+      if (!prod) return;
+
+      currentProductId = id;
+      modalTitle.textContent = prod.title;
+      modalDesc.textContent = prod.desc;
+      modalPrice.textContent = prod.price;
+
+      carouselImages.innerHTML = '';
+      carouselDots.innerHTML = '';
+
+      prod.images.forEach((imgUrl, index) => {
+        const img = document.createElement('img');
+        img.src = imgUrl;
+        img.className = 'carousel-img';
+        carouselImages.appendChild(img);
+
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot' + (index === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goToSlide(index));
+        carouselDots.appendChild(dot);
+      });
+
+      currentSlide = 0;
+      updateCarousel();
+      modal.style.display = 'flex';
+    }
+
+    function updateCarousel() {
+      carouselImages.style.transform = `translateX(-${currentSlide * 100}%)`;
+      const dots = carouselDots.querySelectorAll('.carousel-dot');
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+      });
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateCarousel();
+    }
+
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // === КНОПКА TELEGRAM (с закрытием модалки) ===
+    btnTg.addEventListener('click', () => {
+      const message = encodeURIComponent(
+        `Здравствуйте! Хочу приобрести: "${modalTitle.textContent}".\nЦена: ${modalPrice.textContent}.\nСпасибо!`
+      );
+      const telegramUrl = `https://t.me/Victoria_Koltsova?text=${message}`;
+      window.open(telegramUrl, '_blank');
+      modal.style.display = 'none'; // ✅ теперь закрывается
+    });
+
+    // === ПОИСК И ФИЛЬТРАЦИЯ ===
+    const searchInput = document.getElementById('search-input');
+    const categoryFilter = document.getElementById('category-filter');
+    const productCards = document.querySelectorAll('.product-card');
+
+    function filterProducts() {
+      const query = searchInput.value.toLowerCase().trim();
+      const category = categoryFilter.value;
+
+      productCards.forEach(card => {
+        const name = card.getAttribute('data-name').toLowerCase();
+        const desc = card.getAttribute('data-desc').toLowerCase();
+        const cat = card.getAttribute('data-category');
+
+        const matchesSearch = name.includes(query) || desc.includes(query);
+        const matchesCategory = !category || cat === category;
+
+        card.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', filterProducts);
+    categoryFilter.addEventListener('change', filterProducts);
+  </script>
+
+  <!-- === СКРИПТ ДЛЯ ДВИЖУЩИХСЯ БУКВ === -->
+  <script>
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const letters = [];
+    const colors = [
+      '#FF5252', '#FF4081', '#E040FB', '#7C4DFF', '#536DFE',
+      '#448AFF', '#40C4FF', '#18FFFF', '#64FFDA', '#69F0AE',
+      '#B2FF59', '#EEFF41', '#FFFF00', '#FFD740', '#FFAB40'
+    ];
+
+    alphabet.forEach((char) => {
+      const el = document.createElement('div');
+      el.textContent = char;
+      el.className = 'letter';
+      
+      const size = Math.random() * 30 + 25;
+      el.style.fontSize = `${size}px`;
+      el.style.color = colors[Math.floor(Math.random() * colors.length)];
+      
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight;
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      
+      const vx = (Math.random() - 0.5) * 2.5;
+      const vy = (Math.random() - 0.5) * 2.5;
+      
+      letters.push({ el, x, y, vx, vy, size });
+      document.body.appendChild(el);
+    });
+
+    function animateLetters() {
+      letters.forEach(letter => {
+        letter.x += letter.vx;
+        letter.y += letter.vy;
+
+        if (letter.x <= 0 || letter.x + letter.size >= window.innerWidth) {
+          letter.vx *= -1;
+          letter.x = Math.max(0, Math.min(letter.x, window.innerWidth - letter.size));
+        }
+        if (letter.y <= 0 || letter.y + letter.size >= window.innerHeight) {
+          letter.vy *= -1;
+          letter.y = Math.max(0, Math.min(letter.y, window.innerHeight - letter.size));
+        }
+
+        letter.el.style.left = `${letter.x}px`;
+        letter.el.style.top = `${letter.y}px`;
+      });
+      requestAnimationFrame(animateLetters);
+    }
+
+    // Web Speech API — произношение при наведении
+    if ('speechSynthesis' in window) {
+      document.querySelectorAll('.letter').forEach(el => {
+        el.style.pointerEvents = 'auto'; // Включаем hover только для букв
+        el.addEventListener('mouseenter', () => {
+          const utterance = new SpeechSynthesisUtterance(el.textContent);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.9;
+          speechSynthesis.speak(utterance);
+        });
+      });
+    }
+
+    window.addEventListener('resize', () => {
+      letters.forEach(letter => {
+        letter.x = Math.min(letter.x, window.innerWidth - letter.size);
+        letter.y = Math.min(letter.y, window.innerHeight - letter.size);
+      });
+    });
+
+    animateLetters();
+  </script>
+
+</body>
+</html>
+
+
